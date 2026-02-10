@@ -1,12 +1,22 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// Ensure the route is handled as dynamic to prevent build-time static optimization
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
     try {
+        const apiKey = process.env.OPENAI_API_KEY;
+
+        if (!apiKey) {
+            console.error('OPENAI_API_KEY is missing from environment variables');
+            return NextResponse.json({ error: 'OpenAI API Key is not configured' }, { status: 500 });
+        }
+
+        const openai = new OpenAI({
+            apiKey: apiKey,
+        });
+
         const { name, title, year } = await req.json();
 
         if (!name || !title || !year) {
